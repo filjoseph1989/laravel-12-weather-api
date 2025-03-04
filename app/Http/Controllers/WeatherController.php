@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\WeatherRequest;
+use App\Models\Weather;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
@@ -17,6 +18,13 @@ class WeatherController extends Controller
         $this->apiKey = env('OPENWEATHERMAP_API_KEY');
     }
 
+    /**
+     * Get the weather information for a specific city and country.
+     *
+     * @param \App\Http\Requests\WeatherRequest $request
+     * @throws \Exception
+     * @return mixed|\Illuminate\Http\JsonResponse
+     */
     public function getWeather(WeatherRequest $request): \Illuminate\Http\JsonResponse
     {
         try {
@@ -37,14 +45,17 @@ class WeatherController extends Controller
 
                 $data = $response->json();
 
-                return [
+                $weatherData = [
                     'temperature' => $data['main']['temp'],
                     'description' => $data['weather'][0]['description'],
                     'humidity' => $data['main']['humidity'],
                     'wind_speed' => $data['wind']['speed'],
-                    'timestamp' => now()->toDateTimeString(),
                     'city' => $data['name'],
                 ];
+
+                Weather::create($weatherData);
+
+                return $weatherData;
             });
 
             return response()->json([
