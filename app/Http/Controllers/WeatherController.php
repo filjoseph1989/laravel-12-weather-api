@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\WeatherRequest;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
@@ -17,14 +17,24 @@ class WeatherController extends Controller
         $this->apiKey = env('OPENWEATHERMAP_API_KEY');
     }
 
-    public function getWeather(): \Illuminate\Http\JsonResponse
+    public function getWeather(WeatherRequest $request): \Illuminate\Http\JsonResponse
     {
         try {
-            $weatherData = Cache::remember('weatherData', 900, function() {
-                $response = Http::get("https://api.openweathermap.org/data/2.5/weather?q={$this->city}&appid={$this->apiKey}");
+            $this->city = $request->input('city', $this->city);
+            $this->country = $request->input('country', $this->country);
+            $cacheKey = "weather_{$this->city}_{$this->country}";
+
+            $weatherData = Cache::remember($cacheKey, 900, function() {
+                $response = Http::get('https://api.openweathermap.org/data/2.5/weather', [
+                    'q' => "{$this->city},{$this->country}",
+                    'appid' => $this->apiKey,
+                    'units' => 'metric'
+                ]);
+
                 if ($response->failed()) {
                     throw new \Exception('Failed to retrieve weather data.');
                 }
+
                 $data = $response->json();
 
                 return [
