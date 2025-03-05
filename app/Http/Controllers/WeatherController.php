@@ -6,13 +6,13 @@ use App\Http\Requests\WeatherRequest;
 use App\Models\Weather;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Log;
 
 class WeatherController extends Controller
 {
-    private string $apiKey = '';
-    private string $city = "Perth";
-    private string $country = "AU";
-
+    /**
+     * The API key for OpenWeatherMap.
+     */
     public function __construct()
     {
         $this->apiKey = env('OPENWEATHERMAP_API_KEY');
@@ -21,44 +21,26 @@ class WeatherController extends Controller
     /**
      * Get the weather information for a specific city and country.
      *
-     * @param \App\Http\Requests\WeatherRequest $request
      * @throws \Exception
      * @return mixed|\Illuminate\Http\JsonResponse
      */
-    public function getWeather(WeatherRequest $request): \Illuminate\Http\JsonResponse
+    public function getWeather(): \Illuminate\Http\JsonResponse
     {
         try {
-            $this->city = $request->input('city', $this->city);
-            $this->country = $request->input('country', $this->country);
-            $cacheKey = "weather_{$this->city}_{$this->country}";
+            $weatherData = Cache::remember('weather_data', 900, function() {
+                $weatherData = Weather::latest()->first();
 
-            $weatherData = Cache::remember($cacheKey, 900, function() {
-                $response = Http::get('https://api.openweathermap.org/data/2.5/weather', [
-                    'q' => "{$this->city},{$this->country}",
-                    'appid' => $this->apiKey,
-                    'units' => 'metric'
-                ]);
-
-                if ($response->failed()) {
-                    throw new \Exception('Failed to retrieve weather data.');
+                if (!$weatherData) {
+                    throw new \Exception('Weather data not found in the database.');
                 }
 
-                $data = $response->json();
-
-                $weatherData = [
-                    'temperature' => $data['main']['temp'],
-                    'description' => $data['weather'][0]['description'],
-                    'humidity' => $data['main']['humidity'],
-                    'wind_speed' => $data['wind']['speed'],
-                    'city' => $data['name'],
-                ];
-
-                Weather::create($weatherData);
-
-                \Log::info('Weather data retrieved for city: ' . $weatherData['city']);
+                Log::info('Weather data successfully retrieved and cached.');
 
                 return $weatherData;
             });
+
+
+            Log::info('Weather data successfully retrieved and cached.');
 
             return response()->json([
                 'success' => true,
