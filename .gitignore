@@ -28,3 +28,4 @@ access.log
 error.log
 queries.sql
 result.log
+md/*
