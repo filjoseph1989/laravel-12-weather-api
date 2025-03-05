@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WeatherController;
@@ -23,4 +24,5 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('deletePost');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/users/{user}', [UserController::class, 'getUser'])->name('getUser');
 });
