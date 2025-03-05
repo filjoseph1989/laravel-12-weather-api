@@ -13,33 +13,47 @@ class FetchWeatherJob implements ShouldQueue
     use Queueable;
 
     /**
-     * The API key for OpenWeatherMap.
+     * The number of times the job may be attempted.
+     * @var int
      */
-    private string $apiKey = '';
+    public $tries = 3;
 
     /**
-     * Putting Perth here as the default city.
+     * The number of seconds the job should wait before retrying.
+     * @var int
      */
-    private string $city = "Perth";
+    public $backoff = 60;
+
+    /**
+     * The API key for OpenWeatherMap.
+     */
+    private string $apiKey;
+
+    /**
+     * Default city, fetched from the environment or set to Perth.
+     */
+    private string $city;
 
     /**
      * Setting Australia as the default country.
      */
-    private string $country = "AU";
+    private string $country;
 
     /**
      * The endpoint for the OpenWeatherMap API.
      * @var string
      */
-    private string $endpoint = '';
+    private string $endpoint;
 
     /**
      * Create a new job instance.
      */
-    public function __construct()
+    public function __construct(string $city = null, string $country = null)
     {
         $this->apiKey = env('OPENWEATHERMAP_API_KEY');
         $this->endpoint = env('OPENWEATHERMAP_URL');
+        $this->city = $city ?? env('DEFAULT_CITY') ?? 'Perth';
+        $this->country = $country ?? env('DEFAULT_COUNTRY') ?? 'AU';
     }
 
     /**
@@ -47,40 +61,55 @@ class FetchWeatherJob implements ShouldQueue
      */
     public function handle(): void
     {
-        Log::info('Fetching weather data for city: ' . $this->city);
-
-        $response = Http::get($this->endpoint, [
-            'q' => "{$this->city},{$this->country}",
-            'appid' => $this->apiKey,
-            'units' => 'metric'
-        ]);
-
-        if ($response->failed()) {
-            Log::error('Failed to retrieve weather data for city: ' . $this->city);
-            throw new \Exception('Failed to retrieve weather data from OpenWeatherMap API.');
-        }
-
-        $data = $response->json();
-
-        $weatherData = [
-            'temperature' => $data['main']['temp'],
-            'description' => $data['weather'][0]['description'],
-            'humidity' => $data['main']['humidity'],
-            'wind_speed' => $data['wind']['speed'],
-            'city' => $data['name'],
-        ];
-
-        Log::info('Weather data retrieved for city: ' . $weatherData['city']);
 
         try {
+            Log::info('Fetching weather data for city: ' . $this->city);
+
+            $response = Http::timeout(10)->get($this->endpoint, [
+                'q' => "{$this->city},{$this->country}",
+                'appid' => $this->apiKey,
+                'units' => 'metric'
+            ]);
+
+            if ($response->failed()) {
+                Log::error('Failed to retrieve weather data for city: ' . $this->city);
+                $this->fail(new \Exception('Failed to retrieve weather data from OpenWeatherMap API.')); # This is to respect retry settings
+                return;
+            }
+
+            $data = $response->json();
+
+            $weatherData = [
+                'temperature' => $data['main']['temp'],
+                'description' => $data['weather'][0]['description'],
+                'humidity' => $data['main']['humidity'],
+                'wind_speed' => $data['wind']['speed'],
+                'city' => $data['name'],
+            ];
+
+            Log::info('Weather data retrieved for city: ' . $weatherData['city']);
+
             Weather::create($weatherData);
+
             Log::info('Weather data successfully saved for city: ' . $weatherData['city']);
         } catch (\Throwable $th) {
-            Log::error('Failed to save weather data for city: ' . $weatherData['city']);
-            Log::error($th->getMessage());
-            throw $th;
+            Log::error('Failed to save weather data for city: ' . $this->city . ' - ' . $th->getMessage());
+            $this->fail($th); # This is to respect retry settings
         }
 
+        Log::info('FetchWeatherJob completed for city: ' . $this->city);
+
         return;
+    }
+
+    /**
+     * Summary of failed job execution handling.
+     *
+     * @param \Throwable $exception
+     * @return void
+     */
+    public function failed(\Throwable $exception): void
+    {
+        Log::critical('FetchWeatherJob failed for city: ' . $this->city, ['error' => $exception->getMessage()]);
     }
 }
