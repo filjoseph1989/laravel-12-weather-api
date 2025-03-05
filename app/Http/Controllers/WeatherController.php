@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\WeatherRequest;
+use Log;
 use App\Models\Weather;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
-use Log;
 
 class WeatherController extends Controller
 {
