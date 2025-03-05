@@ -127,4 +127,37 @@ class PostController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Delete an existing post.
+     *
+     * @param \App\Models\Post $post
+     * @return JsonResponse|mixed
+     */
+    public function destroy(Post $post): JsonResponse
+    {
+        try {
+            if (auth()->check() && auth()->id() !== $post->user_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You are not authorized to delete this post.'
+                ], 403);
+            }
+
+            Post::destroy($post->id);
+
+            Cache::forget("post_{$post->id}");
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Post deleted successfully.'
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while deleting the post.',
+                'error' => $th->getMessage()
+            ], 500);
+        }
+    }
 }
