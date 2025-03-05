@@ -11,6 +11,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::post('/login', [AuthController::class, 'login'])->name('login');
+Route::post('/register', [AuthController::class, 'register'])->name('register');
 
 Route::middleware('auth:sanctum')->get('/weather', [WeatherController::class, 'getWeather'])->name('current_weather');
 
@@ -20,4 +21,6 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::post('/posts', [PostController::class, 'store'])->name('createPost');
     Route::put('/posts/{post}', [PostController::class, 'update'])->name('updatePost');
     Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('deletePost');
+
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
