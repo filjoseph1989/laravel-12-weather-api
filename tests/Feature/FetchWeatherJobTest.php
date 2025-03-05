@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Jobs\FetchWeatherJob;
 use App\Models\User;
+use App\Models\Weather;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Http;
@@ -12,6 +13,17 @@ use Tests\TestCase;
 class FetchWeatherJobTest extends TestCase
 {
     use RefreshDatabase;
+
+    /**
+     * Remove all records from the weather table after each test.
+     * 
+     * @return void
+     */
+    public function tearDown(): void
+    {
+        parent::tearDown();
+        Weather::truncate();
+    }
 
     /**
      * first we fake the HTTP request to the OpenWeatherMap API

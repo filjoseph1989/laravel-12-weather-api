@@ -12,6 +12,25 @@ class CleanWeatherDataTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * Remove all records from the weather table after each test.
+     * 
+     * @return void
+     */
+    public function tearDown(): void
+    {
+        parent::tearDown();
+        Weather::truncate();
+    }
+
+    /**
+     * Create old records and recent records in the weather table.
+     * Call the clean-weather-data command.
+     * Assert that the old records have been deleted.
+     * Assert that the command output contains the expected message.
+     *
+     * @return void
+     */
     public function test_clean_weather_data_command_removes_old_records()
     {
         // Create old weather data

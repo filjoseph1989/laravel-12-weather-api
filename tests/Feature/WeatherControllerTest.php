@@ -4,10 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Models\Weather;
+use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Support\Facades\Http;
-use Tests\TestCase;
 
 class WeatherControllerTest extends TestCase
 {
@@ -17,6 +16,17 @@ class WeatherControllerTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
+    }
+
+    /**
+     * Remove all records from the weather table after each test.
+     *
+     * @return void
+     */
+    public function tearDown(): void
+    {
+        parent::tearDown();
+        Weather::truncate();
     }
 
     /**
@@ -62,6 +72,8 @@ class WeatherControllerTest extends TestCase
                     'wind_speed' => 3.6,
                 ],
             ]);
+
+        $user->delete();
     }
 
     /**
@@ -83,5 +95,7 @@ class WeatherControllerTest extends TestCase
                 'success' => false,
                 'message' => 'Failed to retrieve weather data.',
             ]);
+
+        $user->delete();
     }
 }
