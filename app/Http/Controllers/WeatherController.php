@@ -55,6 +55,8 @@ class WeatherController extends Controller
 
                 Weather::create($weatherData);
 
+                \Log::info('Weather data retrieved for city: ' . $weatherData['city']);
+
                 return $weatherData;
             });
 
