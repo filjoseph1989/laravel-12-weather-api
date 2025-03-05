@@ -20,3 +20,7 @@ Schedule::job(new FetchWeatherJob())
     ->onSuccess(function () {
         Log::info('FetchWeatherJob executed successfully.');
     });
+
+Artisan::command('app:clean-weather-data', function () {
+    $this->call('app:clean-weather-data');
+})->purpose('Remove old weather data from the database.');
