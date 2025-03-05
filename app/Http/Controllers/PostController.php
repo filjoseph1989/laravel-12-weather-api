@@ -64,4 +64,35 @@ class PostController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Create a new post.
+     *
+     * @param \App\Http\Requests\PostStoreRequest $request
+     * @return JsonResponse|mixed
+     */
+    public function store(PostStoreRequest $request): JsonResponse
+    {
+        try {
+            $post = Post::create([
+                'title' => $request->input('title'),
+                'content' => $request->input('content'),
+                'user_id' => auth()->id()
+            ]);
+
+            $post->loadMissing('user');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Post created successfully.',
+                'data' => new PostResource($post)
+            ], 201);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while creating the post.',
+                'error' => $th->getMessage()
+            ], 500);
+        }
+    }
 }
