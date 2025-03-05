@@ -95,4 +95,36 @@ class PostController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Update an existing post.
+     *
+     * @param \App\Models\Post $post
+     * @param \App\Http\Requests\PostStoreRequest $request
+     * @return JsonResponse|mixed
+     */
+    public function update(Post $post, PostStoreRequest $request): JsonResponse
+    {
+        try {
+            Post::where('id', $post->id)->update([
+                'title' => $request->input('title'),
+                'content' => $request->input('content')
+            ]);
+
+            $post->loadMissing('user');
+            $post->refresh();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Post updated successfully.',
+                'data' => new PostResource($post)
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while updating the post.',
+                'error' => $th->getMessage()
+            ], 500);
+        }
+    }
 }
