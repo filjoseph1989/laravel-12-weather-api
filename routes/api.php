@@ -20,8 +20,8 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::get('/posts', [PostController::class, 'getPaginatedPost'])->name('getPaginatedPost');
     Route::get('/posts/{post}', [PostController::class, 'getPost'])->name('getPost');
     Route::post('/posts', [PostController::class, 'store'])->name('createPost');
-    Route::put('/posts/{post}', [PostController::class, 'update'])->name('updatePost');
-    Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('deletePost');
+    Route::put('/posts/{id}', [PostController::class, 'update'])->name('updatePost');
+    Route::delete('/posts/{id}', [PostController::class, 'destroy'])->name('deletePost');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/users/{user}', [UserController::class, 'getUser'])->name('getUser');
