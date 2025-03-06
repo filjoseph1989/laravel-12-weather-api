@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Weather;
 use Illuminate\Console\Command;
+use Log;
 
 class CleanWeatherData extends Command
 {
@@ -26,7 +27,10 @@ class CleanWeatherData extends Command
      */
     public function handle()
     {
-        Weather::where('created_at', '<', now()->subDays(7))->delete();
-        $this->info('Old weather data deleted successfully.');
+        Log::info('Running clean weather data command...');
+        $deletedCount = Weather::where('created_at', '<', now()->subDays(7))->delete();
+        Log::info("CleanWeatherData command executed: Deleted {$deletedCount} old weather records.");
+
+        return $deletedCount > 0 ? 0 : 1;
     }
 }

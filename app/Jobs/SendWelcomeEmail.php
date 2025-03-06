@@ -13,7 +13,16 @@ class SendWelcomeEmail implements ShouldQueue
 {
     use Queueable;
 
+    /**
+     * The user the email is being sent to.
+     * @var User
+     */
     protected User $user;
+
+    /**
+     * The token to be included in the email.
+     * @var string
+     */
     protected string $token;
 
     /**
@@ -31,7 +40,11 @@ class SendWelcomeEmail implements ShouldQueue
     public function handle(): void
     {
         Log::info('Sending welcome email to ' . $this->user->email);
-        Mail::to($this->user->email)->send(new WelcomeEmail($this->user, $this->token));
-        Log::info('Welcome email sent successfully to ' . $this->user->email);
+        try {
+            Mail::to($this->user->email)->send(new WelcomeEmail($this->user, $this->token));
+            Log::info('Welcome email sent successfully to ' . $this->user->email);
+        } catch (\Exception $e) {
+            Log::error('Failed to send welcome email to ' . $this->user->email . ': ' . $e->getMessage());
+        }
     }
 }

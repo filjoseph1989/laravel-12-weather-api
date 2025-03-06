@@ -61,7 +61,6 @@ class FetchWeatherJob implements ShouldQueue
      */
     public function handle(): void
     {
-
         try {
             Log::info('Fetching weather data for city: ' . $this->city);
 
