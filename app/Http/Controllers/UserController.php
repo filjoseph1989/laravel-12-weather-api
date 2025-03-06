@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Services\UserService;
 use App\Traits\ApiResponse;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\JsonResponse;
 
 class UserController extends Controller
 {
@@ -28,7 +29,7 @@ class UserController extends Controller
      * @param \App\Models\User $user
      * @return mixed|\Illuminate\Http\JsonResponse
      */
-    public function getUser(User $user)
+    public function getUser(User $user): JsonResponse
     {
         try {
             $this->authorize('view', $user);

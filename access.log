@@ -1,7 +1,0 @@
-::1 - - [04/Mar/2025:21:14:08 +0800] "GET / HTTP/1.1" 500 156372 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0"
-::1 - - [04/Mar/2025:21:15:09 +0800] "GET / HTTP/1.1" 500 307435 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0"
-::1 - - [04/Mar/2025:21:17:47 +0800] "GET / HTTP/1.1" 500 323555 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0"
-::1 - - [04/Mar/2025:21:18:05 +0800] "GET / HTTP/1.1" 500 323534 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0"
-::1 - - [04/Mar/2025:21:21:19 +0800] "GET / HTTP/1.1" 500 323559 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0"
-::1 - - [04/Mar/2025:21:28:51 +0800] "GET / HTTP/1.1" 200 17237 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0"
-::1 - - [04/Mar/2025:21:29:02 +0800] "GET /favicon.ico HTTP/1.1" 404 6868 "http://weather-api.test/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0"
