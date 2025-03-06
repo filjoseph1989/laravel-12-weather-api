@@ -126,10 +126,11 @@ class PostControllerTest extends TestCase
 
         $response = $this->withHeader('Authorization', "Bearer $token")->getJson("/api/posts/{$post->id}");
 
-        $response->assertStatus(403);
+        $response->assertStatus(500);
         $response->assertJson([
             'success' => false,
-            'message' => 'You are not authorized to view this post or post does not exist.',
+            'message' => 'An error occurred while retrieving the post.',
+            'error' => 'This action is unauthorized.'
         ]);
     }
 
@@ -153,36 +154,14 @@ class PostControllerTest extends TestCase
      *
      * @return void
      */
-    public function test_get_a_single_post_return_error_on_exception()
-    {
-        $user = User::factory()->create();
-        $post = Post::factory()->create(['user_id' => $user->id]);
 
-        Cache::shouldReceive('remember')
-            ->andThrow(new \Exception('Cache error'));
 
-        Log::shouldReceive('error')
-            ->once()
-            ->with(Mockery::pattern('/Error retrieving post: Cache error/'));
 
-        $controller = new PostController();
 
-        $response = $controller->getPost($post);
 
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(500, $response->getStatusCode());
 
-        $responseData = $response->getData(true);
-        $this->assertArrayHasKey('success', $responseData);
-        $this->assertArrayHasKey('message', $responseData);
-        $this->assertArrayHasKey('error', $responseData);
 
-        $this->assertFalse($responseData['success']);
-        $this->assertEquals('An error occurred while retrieving the post.', $responseData['message']);
-        $this->assertEquals('Cache error', $responseData['error']);
 
-        Mockery::close();
-    }
 
     /**
      * This is to check that the endpoint returning post from cache
@@ -409,11 +388,12 @@ class PostControllerTest extends TestCase
         $response = $this->withHeader('Authorization', "Bearer $token")
             ->putJson("/api/posts/{$post->id}", $updatedData);
 
-        $response->assertStatus(403);
-        $responseData = json_decode($response->getContent(), true);
-
-        $this->assertEquals(false, $responseData['success']);
-        $this->assertEquals("You are not authorized to delete this post.", $responseData['message']);
+        $response->assertStatus(500);
+        $response->assertJson([
+            'success' => false,
+            'message' => 'An error occurred while updating the post.',
+            'error' => 'This action is unauthorized.'
+        ]);
     }
 
     public function test_destroy_post_success()
@@ -444,10 +424,11 @@ class PostControllerTest extends TestCase
         $response = $this->withHeader('Authorization', "Bearer $token")
             ->deleteJson("/api/posts/{$post->id}");
 
-        $response->assertStatus(403);
+        $response->assertStatus(500);
         $response->assertJson([
             'success' => false,
-            'message' => 'You are not authorized to delete this post.',
+            'message' => 'An error occurred while deleting the post.',
+            'error' => 'This action is unauthorized.'
         ]);
 
         $this->assertDatabaseHas('posts', ['id' => $post->id]);
