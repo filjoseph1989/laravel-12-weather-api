@@ -9,6 +9,10 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
+Artisan::command('app:clean-weather-data', function () {
+    $this->call('app:clean-weather-data');
+})->purpose('Remove old weather data from the database.')->daily();
+
 Schedule::job(new FetchWeatherJob())
     ->hourly()
     ->name('fetch-weather-job')
@@ -20,7 +24,3 @@ Schedule::job(new FetchWeatherJob())
     ->onSuccess(function () {
         Log::info('FetchWeatherJob executed successfully.');
     });
-
-Artisan::command('app:clean-weather-data', function () {
-    $this->call('app:clean-weather-data');
-})->purpose('Remove old weather data from the database.');
