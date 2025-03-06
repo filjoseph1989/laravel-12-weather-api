@@ -19,8 +19,8 @@ class PostResource extends JsonResource
             'title' => $this->title,
             'content' => $this->content,
             'author' => $this->user->name ?? 'Unknown',
-            'created_at' => $this->created_at->toDateTimeString(),
-            'updated_at' => $this->updated_at->toDateTimeString(),
+            'created_at' => $this->created_at ? $this->created_at->toDateTimeString() : '',
+            'updated_at' => $this->updated_at ? $this->updated_at->toDateTimeString() : '',
         ];
     }
 }
