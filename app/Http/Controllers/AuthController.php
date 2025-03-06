@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use Log;
 use App\Models\User;
-use App\Mail\WelcomeEmail;
+use App\Jobs\SendWelcomeEmail;
 use App\Http\Requests\AuthRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
 {
@@ -84,7 +84,9 @@ class AuthController extends Controller
 
             $token = $user->createToken('authToken')->plainTextToken;
 
-            Mail::to($user->email)->send(new WelcomeEmail($user, $token));
+            SendWelcomeEmail::dispatch($user, $token);
+
+            Log::info('Dispatched welcome email for user: ' . $user->email);
 
             return response()->json([
                 'success' => true,
