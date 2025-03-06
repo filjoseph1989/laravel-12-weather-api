@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\RegisterRequest;
 use Log;
 use App\Models\User;
 use App\Jobs\SendWelcomeEmail;
@@ -16,23 +17,34 @@ class AuthController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return mixed|\Illuminate\Http\JsonResponse
      */
-    public function login(Request $request): \Illuminate\Http\JsonResponse
+    public function login(AuthRequest $request): \Illuminate\Http\JsonResponse
     {
-        $credentials = $request->only('email', 'password');
+        try {
+            $credentials = $request->only('email', 'password');
 
-        if (!auth()->attempt($credentials)) {
+            if (!auth()->attempt($credentials)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid credentials.'
+                ], 401);
+            }
+
+            $token = auth()->user()->createToken('authToken')->plainTextToken;
+
+            return response()->json([
+                'success' => true,
+                'token' => $token
+            ], 200);
+
+        } catch (\Throwable $th) {
+            Log::error('An error occurred while logging in: ' . $th->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid credentials.'
-            ], 401);
+                'message' => 'An error occurred while logging in.',
+                'error' => $th->getMessage()
+            ], 500);
         }
-
-        $token = auth()->user()->createToken('authToken')->plainTextToken;
-
-        return response()->json([
-            'success' => true,
-            'token' => $token
-        ], 200);
     }
 
     /**
@@ -57,6 +69,7 @@ class AuthController extends Controller
                 'message' => 'User logged out successfully.'
             ], 200);
         } catch (\Throwable $th) {
+            Log::error('An error occurred while logging out: ' . $th->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'An error occurred while logging out.',
@@ -71,7 +84,7 @@ class AuthController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return mixed|\Illuminate\Http\JsonResponse
      */
-    public function register(AuthRequest $request): \Illuminate\Http\JsonResponse
+    public function register(RegisterRequest $request): \Illuminate\Http\JsonResponse
     {
         try {
             $validatedData = $request->validated();
@@ -93,6 +106,7 @@ class AuthController extends Controller
                 'token' => $token
             ], 201);
         } catch (\Throwable $th) {
+            Log::error('An error occurred while registering the user: ' . $th->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'An error occurred while registering the user.',

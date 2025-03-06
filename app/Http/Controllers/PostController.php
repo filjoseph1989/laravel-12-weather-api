@@ -8,6 +8,7 @@ use App\Http\Resources\PostCollection;
 use App\Http\Resources\PostResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
+use Log;
 
 class PostController extends Controller
 {
@@ -22,6 +23,7 @@ class PostController extends Controller
             $posts = Post::with('user')->paginate();
             return response()->json(new PostCollection($posts), 200);
         } catch (\Throwable $th) {
+            Log::error('Error retrieving posts: ' . $th->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'An error occurred while retrieving posts.',
@@ -57,6 +59,7 @@ class PostController extends Controller
                 'data' => $postData
             ], 200);
         } catch (\Throwable $th) {
+            Log::error('Error retrieving post: ' . $th->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'An error occurred while retrieving the post.',
@@ -88,6 +91,7 @@ class PostController extends Controller
                 'data' => new PostResource($post)
             ], 201);
         } catch (\Throwable $th) {
+            Log::error('Error creating post: ' . $th->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'An error occurred while creating the post.',
@@ -120,6 +124,7 @@ class PostController extends Controller
                 'data' => new PostResource($post)
             ], 200);
         } catch (\Throwable $th) {
+            Log::error('Error updating post: ' . $th->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'An error occurred while updating the post.',
@@ -153,6 +158,7 @@ class PostController extends Controller
                 'message' => 'Post deleted successfully.'
             ], 200);
         } catch (\Throwable $th) {
+            Log::error('Error deleting post: ' . $th->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'An error occurred while deleting the post.',
