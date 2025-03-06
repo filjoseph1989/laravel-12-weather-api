@@ -4,14 +4,25 @@ namespace App\Http\Controllers;
 
 use Log;
 use App\Models\Post;
+use App\Services\PostService;
+use App\Traits\ApiResponse;
 use App\Http\Requests\PostStoreRequest;
 use App\Http\Resources\PostCollection;
 use App\Http\Resources\PostResource;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class PostController extends Controller
 {
+    use AuthorizesRequests, ApiResponse;
+
+    private $postService;
+
+    public function __construct(PostService $postService)
+    {
+        $this->postService = $postService;
+    }
+
     /**
      * Retrieve a paginated list of all posts.
      *
@@ -20,7 +31,7 @@ class PostController extends Controller
     public function getPaginatedPost(): JsonResponse
     {
         try {
-            $posts = Post::with('user')->paginate();
+            $posts = $this->postService->getPaginatedPosts();
             return response()->json(new PostCollection($posts), 200);
         } catch (\Throwable $th) {
             Log::error('Error retrieving posts: ' . $th->getMessage());
@@ -41,24 +52,9 @@ class PostController extends Controller
     public function getPost(Post $post): JsonResponse
     {
         try {
-            // lets check if user is authorized to get this post
-            if (auth()->check() && auth()->id() !== $post->user_id) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'You are not authorized to view this post or post does not exist.'
-                ], 403);
-            }
-
-            $post->loadMissing('user');
-
-            $cacheKey = "post_{$post->id}";
-            $postData = Cache::remember($cacheKey, 900, fn() => new PostResource($post));
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Post retrieved successfully.',
-                'data' => $postData
-            ], 200);
+            $this->authorize('view', $post);
+            $post = $this->postService->getPost($post);
+            return $this->successResponse(new PostResource($post), 'Post retrieved successfully.');
         } catch (\Throwable $th) {
             Log::error('Error retrieving post: ' . $th->getMessage());
             return response()->json([
@@ -78,19 +74,8 @@ class PostController extends Controller
     public function store(PostStoreRequest $request): JsonResponse
     {
         try {
-            $post = Post::create([
-                'title' => $request->input('title'),
-                'content' => $request->input('content'),
-                'user_id' => auth()->id()
-            ]);
-
-            $post->loadMissing('user');
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Post created successfully.',
-                'data' => new PostResource($post)
-            ], 201);
+            $post = $this->postService->createPost($request->all(), auth()->id());
+            return $this->successResponse(new PostResource($post), 'Post created successfully.', 201);
         } catch (\Throwable $th) {
             Log::error('Error creating post: ' . $th->getMessage());
             return response()->json([
@@ -121,29 +106,10 @@ class PostController extends Controller
 
             $post = Post::where('id', $id)->first();
 
-            // lets check if user is authorized to update this post
-            if (auth()->check() && auth()->id() !== $post->user_id) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'You are not authorized to delete this post.'
-                ], 403);
-            }
+            $this->authorize('update', $post);
 
-            // lets update post
-            Post::where('id', $id)->update([
-                'title' => $request->input('title'),
-                'content' => $request->input('content')
-            ]);
-
-            $post = Post::where('id', $id)->first();
-            $post->loadMissing('user');
-            $post->refresh();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Post updated successfully.',
-                'data' => new PostResource($post)
-            ], 200);
+            $post = $this->postService->updatePost($post, $request->all());
+            return $this->successResponse(new PostResource($post), 'Post updated successfully.');
         } catch (\Throwable $th) {
             Log::error('Error updating post: ' . $th->getMessage());
             return response()->json([
@@ -173,22 +139,9 @@ class PostController extends Controller
 
             $post = Post::where('id', $id)->first();
 
-            // lets check if user is authorized to delete this post
-            if (auth()->check() && auth()->id() !== $post->user_id) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'You are not authorized to delete this post.'
-                ], 403);
-            }
-
-            Post::destroy($post->id);
-
-            Cache::forget("post_{$post->id}");
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Post deleted successfully.'
-            ], 200);
+            $this->authorize('delete', $post);
+            $this->postService->deletePost($post);
+            return $this->successResponse(null, 'Post deleted successfully.');
         } catch (\Throwable $th) {
             Log::error('Error deleting post: ' . $th->getMessage());
             return response()->json([
