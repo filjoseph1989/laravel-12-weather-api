@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Log;
 use App\Models\Post;
 use App\Http\Requests\PostStoreRequest;
 use App\Http\Resources\PostCollection;
 use App\Http\Resources\PostResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
-use Log;
 
 class PostController extends Controller
 {
@@ -41,6 +41,7 @@ class PostController extends Controller
     public function getPost(Post $post): JsonResponse
     {
         try {
+            // lets check if user is authorized to get this post
             if (auth()->check() && auth()->id() !== $post->user_id) {
                 return response()->json([
                     'success' => false,
@@ -107,14 +108,34 @@ class PostController extends Controller
      * @param \App\Http\Requests\PostStoreRequest $request
      * @return JsonResponse|mixed
      */
-    public function update(Post $post, PostStoreRequest $request): JsonResponse
+    public function update(int $id, PostStoreRequest $request): JsonResponse
     {
         try {
-            Post::where('id', $post->id)->update([
+            // lets make sure post exists
+            if (Post::where('id', $id)->count() === 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Post not found.'
+                ], 404);
+            }
+
+            $post = Post::where('id', $id)->first();
+
+            // lets check if user is authorized to update this post
+            if (auth()->check() && auth()->id() !== $post->user_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You are not authorized to delete this post.'
+                ], 403);
+            }
+
+            // lets update post
+            Post::where('id', $id)->update([
                 'title' => $request->input('title'),
                 'content' => $request->input('content')
             ]);
 
+            $post = Post::where('id', $id)->first();
             $post->loadMissing('user');
             $post->refresh();
 
@@ -139,9 +160,20 @@ class PostController extends Controller
      * @param \App\Models\Post $post
      * @return JsonResponse|mixed
      */
-    public function destroy(Post $post): JsonResponse
+    public function destroy(int $id): JsonResponse
     {
         try {
+            // lets make sure post exists
+            if (Post::where('id', $id)->count() === 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Post not found.'
+                ], 404);
+            }
+
+            $post = Post::where('id', $id)->first();
+
+            // lets check if user is authorized to delete this post
             if (auth()->check() && auth()->id() !== $post->user_id) {
                 return response()->json([
                     'success' => false,
