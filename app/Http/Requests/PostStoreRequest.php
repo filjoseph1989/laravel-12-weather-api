@@ -32,7 +32,7 @@ class PostStoreRequest extends FormRequest
     /**
      * Get the error messages for the defined validation rules.
      *
-     * @return array{content.required: string, content.string: string, title.max: string, title.required: string, title.string: string}
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function messages(): array
     {

@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
+use Log;
 use App\Models\Weather;
 use Illuminate\Console\Command;
-use Log;
 
 class CleanWeatherData extends Command
 {

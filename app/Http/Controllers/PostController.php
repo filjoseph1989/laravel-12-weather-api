@@ -16,6 +16,10 @@ class PostController extends Controller
 {
     use AuthorizesRequests, ApiResponse;
 
+    /**
+     * Handle postservice instance
+     * @var
+     */
     private $postService;
 
     public function __construct(PostService $postService)

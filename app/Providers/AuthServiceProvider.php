@@ -10,6 +10,10 @@ use Illuminate\Support\ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
 {
+    /**
+     * These are policies use by controller to enforce authentication.
+     * @var array
+     */
     protected $policies = [
         User::class => UserPolicy::class,
         Post::class => PostPolicy::class,

@@ -61,19 +61,11 @@ class PostService
      */
     public function updatePost(Post $post, array $data): Post
     {
-        // $post->update([
-        //     'title' => $data['title'],
-        //     'content' => $data['content'],
-        // ]);
-        // $post->loadMissing('user');
-        // $post->refresh();
-        // lets update post
         $post->update([
             'title' => $data['title'],
             'content' => $data['content']
         ]);
 
-        // $post = Post::where('id', $id)->first();
         $post->loadMissing('user');
         $post->refresh();
         return $post;

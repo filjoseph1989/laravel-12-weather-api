@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Log;
 use App\Models\Weather;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 
 class WeatherController extends Controller
@@ -22,7 +23,7 @@ class WeatherController extends Controller
      * @throws \Exception
      * @return mixed|\Illuminate\Http\JsonResponse
      */
-    public function getWeather(): \Illuminate\Http\JsonResponse
+    public function getWeather(): JsonResponse
     {
         try {
             $weatherData = Cache::remember('weather_data', 900, function() {
@@ -36,7 +37,6 @@ class WeatherController extends Controller
 
                 return $weatherData;
             });
-
 
             Log::info('Weather data successfully retrieved and cached.');
 

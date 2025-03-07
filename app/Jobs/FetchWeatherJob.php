@@ -2,11 +2,11 @@
 
 namespace App\Jobs;
 
+use Log;
 use App\Models\Weather;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Http;
-use Log;
 
 class FetchWeatherJob implements ShouldQueue
 {
@@ -58,6 +58,8 @@ class FetchWeatherJob implements ShouldQueue
 
     /**
      * Execute the job.
+     *
+     * @return void
      */
     public function handle(): void
     {

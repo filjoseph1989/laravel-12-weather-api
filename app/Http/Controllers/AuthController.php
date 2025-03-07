@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\RegisterRequest;
+use Illuminate\Http\JsonResponse;
 use Log;
 use App\Models\User;
 use App\Jobs\SendWelcomeEmail;
 use App\Http\Requests\AuthRequest;
-use Illuminate\Http\Request;
+use App\Http\Requests\RegisterRequest;
 
 class AuthController extends Controller
 {
@@ -17,7 +17,7 @@ class AuthController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return mixed|\Illuminate\Http\JsonResponse
      */
-    public function login(AuthRequest $request): \Illuminate\Http\JsonResponse
+    public function login(AuthRequest $request): JsonResponse
     {
         try {
             $credentials = $request->only('email', 'password');
@@ -35,7 +35,6 @@ class AuthController extends Controller
                 'success' => true,
                 'token' => $token
             ], 200);
-
         } catch (\Throwable $th) {
             Log::error('An error occurred while logging in: ' . $th->getMessage());
 
@@ -52,7 +51,7 @@ class AuthController extends Controller
      *
      * @return mixed|\Illuminate\Http\JsonResponse
      */
-    public function logout()
+    public function logout(): JsonResponse
     {
         if (!auth()->check()) {
             return response()->json([
@@ -84,7 +83,7 @@ class AuthController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return mixed|\Illuminate\Http\JsonResponse
      */
-    public function register(RegisterRequest $request): \Illuminate\Http\JsonResponse
+    public function register(RegisterRequest $request): JsonResponse
     {
         try {
             $validatedData = $request->validated();

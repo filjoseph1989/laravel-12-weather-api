@@ -13,10 +13,17 @@ class WelcomeEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    /**
+     * User to be email with
+     * @var
+     */
     public $user;
+
+    /**
+     * Token to be used for authentication
+     * @var
+     */
     public $token;
-
-
 
     /**
      * Create a new message instance.
@@ -29,6 +36,8 @@ class WelcomeEmail extends Mailable
 
     /**
      * Get the message envelope.
+     *
+     * @return \Illuminate\Mail\Mailables\Envelope
      */
     public function envelope(): Envelope
     {
@@ -39,6 +48,8 @@ class WelcomeEmail extends Mailable
 
     /**
      * Get the message content definition.
+     *
+     * @return \Illuminate\Mail\Mailables\Content
      */
     public function content(): Content
     {

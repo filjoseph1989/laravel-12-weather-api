@@ -28,6 +28,11 @@ class RegisterRequest extends FormRequest
         ];
     }
 
+    /**
+     * Validation messages for the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
     public function messages(): array
     {
         return [

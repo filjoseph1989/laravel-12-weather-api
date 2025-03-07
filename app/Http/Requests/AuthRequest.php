@@ -27,6 +27,10 @@ class AuthRequest extends FormRequest
         ];
     }
 
+    /**
+     * The validation messages
+     * @return array{email.email: string, email.required: string, password.required: string}
+     */
     public function messages(): array
     {
         return [
