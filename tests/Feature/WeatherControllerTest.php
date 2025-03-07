@@ -25,8 +25,8 @@ class WeatherControllerTest extends TestCase
      */
     public function tearDown(): void
     {
-        parent::tearDown();
         Weather::truncate();
+        parent::tearDown();
     }
 
     /**

@@ -19,7 +19,7 @@ class ManuallyFetchWeatherData extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Fetch weather data manually.';
 
     /**
      * Execute the console command.
